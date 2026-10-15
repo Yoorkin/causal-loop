@@ -1,26 +1,42 @@
-# 因果回廊 / Causal Loop
+# Causal Loop
 
-MoonBit + Selene WebGPU 的四关因果解谜 Demo。每条生命自动记录操作输入；下一条生命重演这些输入，但环境变化可以改变历史角色的行动结果。
+A four-level causal puzzle demo built with MoonBit and Selene WebGPU. Each life records your inputs. The next life replays them, but changes to the shared world can change what your past self accomplishes.
 
-练习关从 **1 条生命** 开始，依次练习移动、两次跳跃与按 S 穿过单向平台；出口前的爱心碰到即增加一条生命，本关时间同样正常流逝。每轮先蓄积 **18 秒**，随后释放 0.2 秒的冲击波。只有冲击波碰到人物才会冻结，远离圆心可以多争取一点行动时间；蓄积圆完全无害。第二、三关各 **2 条生命**，第四关 **3 条生命**。冲击铺满后换命，当前角色坠落也会换命，生命用尽则停止。拾取加速道具后按住 **空格**，全世界 **6×** 快进；冲击、换命、换关时自动解除，必须松开再按才能重新加速。触碰出口自动切关，伴随短暂的横向揭幕动画。
+The practice level starts with **one life** and introduces movement, two jumps, and dropping through a one-way platform with **S**. Touching the heart near the exit adds a life. Time flows normally here, too. Each loop charges for **18 seconds**, then releases a **0.2-second shockwave**. Only contact with the expanding shockwave freezes a character; the charging circle is harmless. Staying farther from its center gives you a little more time to act. Levels 2 and 3 each provide **two lives**; level 4 provides **three**. A completed shockwave or a fatal fall ends the current life. Running out of lives ends the attempt.
 
-加速道具位于第二关出口前，由当前或历史角色接触拾取。拾取后图标用 0.85 秒沿弧线飞向左上角道具栏，跨关继续飞行；到达后置于细方框内，下方显示 14px 的 SPACE 按键提示。未拾取的道具和爱心按正弦曲线上下浮动，底部各有青色、红色上照光束。空道具栏不显示占位。道具仅保存在内存，死亡、重试和切关都保留，刷新清空。网页右上角 Debug 复选框可临时绕过拾取要求使用加速，但不会授予道具。主动加速时钟轻微抖动，松开后停止；最后四秒仍按原规则预警。
+After collecting the time-acceleration item, hold **Space** to advance the whole world at **6x speed**. Acceleration stops at the start of a shockwave, a new life, or a level transition. Release and press Space again to reactivate it. Touching the exit automatically advances to the next level with a short horizontal reveal.
 
-顶部红色爱心表示剩余生命。中央加粗时钟刻度和指针完全反色；每条命分别从本关的 12、1、2、3 点开始，时针随分针按真实钟表比例前进。无害的蓄积反色圆叠在表盘上，从 0 慢慢长到 34 像素的刻度内缘，最后 4 秒表盘和圆心一起小幅震颤并逐渐增强，然后立即变为统一近黑深紫色的冲击圆，立即快速冲出、随后继续加速，铺满时直接停住。圆完全遮住场景，人物始终在圆前方，被碰到后保持当时的姿势。通常生命结束立即扣心。有剩余生命时，铺满后停留 0.6 秒，再用 1.1 秒淡出并让两针倒转回本关整点，归零后立即重生并恢复操作。通常冲击到重新行动合计为 1.9 秒；第二关第一次消耗生命时，顶部的心先保留 0.2 秒，再用 0.8 秒飞到时钟前，闪烁 0.6 秒后消失并触发 4 秒倒带，归零后额外停留 1.6 秒；停顿结束立即重生，没有重生准备阶段。倒带前 2 秒表盘和指针小幅抖动并逐渐平稳，过渡不消耗新生命时间。生命耗尽则保留最后画面和时针角度，不淡出、不倒拨，淡入 Game Over 和下一行 space retry，按空格重试本关。
+## Pickups and inventory
 
-## 运行
+The acceleration item sits just before the exit in level 2. Either your current character or an active past self can collect it. Its icon flies along an arc into the upper-left inventory over 0.85 seconds, continuing across level transitions. The inventory displays owned items in thin square frames with a 14px **SPACE** label below the icon; empty slots are hidden.
 
-需要 MoonBit 工具链、Python 3.9+、网络连接，以及支持 WebGPU 的桌面浏览器。本机实测版本：
+Uncollected items and hearts bob along a sine wave, with cyan and red light shining upward from the ground respectively. Items remain available after death, retries, and level changes, but refreshing the page clears them. The **Debug** checkbox at the top-right of the page enables acceleration without collecting the item; it does not grant ownership. Active acceleration makes the clock tremble slightly. Releasing Space stops that effect, while the normal warning during the final four seconds still applies.
 
-| 组件 | 版本 |
+## Clock, lives, and rewind
+
+Red hearts at the top show remaining lives. The central clock uses opaque inverted strokes for its ticks and hands. Each life starts on the hour assigned to its level: **12:00, 1:00, 2:00, or 3:00**. The hour hand advances alongside the minute hand at the same ratio as a real clock.
+
+The harmless charging circle inverts the scene over the clock and grows from radius zero to the inner edge of the ticks at 34 pixels. During the last four seconds, the clock and circle tremble with increasing intensity. The circle then becomes a solid, nearly black purple shockwave that launches immediately, accelerates outward, and stops when it fills the scene. Characters remain in front of it and freeze in their current poses when touched.
+
+A normal life ending immediately consumes a heart. If another life remains, the full-screen wave holds for 0.6 seconds, then fades over 1.1 seconds as both hands rewind to the level's starting hour. The next life begins immediately afterward. Including the impact, this normally takes **1.9 seconds**.
+
+The first life consumed in level 2 has a longer teaching sequence: its heart stays in the HUD for 0.2 seconds, flies to the clock over 0.8 seconds, blinks for 0.6 seconds, then disappears to trigger a **4-second rewind**. The hands pause at the starting hour for another 1.6 seconds before the next life begins. There is no separate respawn preparation stage. The clock trembles gently during the first two seconds of rewind and gradually settles. These transitions do not consume time from the next life.
+
+When no lives remain, the final scene and hand positions stay frozen. There is no fade-out or rewind. **Game Over** and **space retry** fade in; a fresh press of Space restarts the current level.
+
+## Running locally
+
+You need the MoonBit toolchain, Python 3.9+, an internet connection for dependency setup, and a desktop browser with WebGPU support. Verified versions:
+
+| Component | Version |
 | --- | --- |
-| moon | 0.1.20261012，提交 748b63c |
+| moon | 0.1.20261012, commit 748b63c |
 | moonc | v0.10.15+943464bfa |
 | Selene / Selene WebGPU | 0.37.3 / 0.37.3 |
 | js-ffi | 0.4.3 |
-| 图形验证浏览器 | Chromium 145.0.7632.6，macOS Apple Silicon |
+| Browser used for graphics validation | Chromium 145.0.7632.6 on macOS Apple Silicon |
 
-在项目目录执行：
+From the project directory:
 
 ```sh
 python3 scripts/bootstrap.py
@@ -28,64 +44,66 @@ moon build --release
 python3 scripts/serve.py
 ```
 
-打开 <http://127.0.0.1:8000>。WebGPU 需要安全上下文，localhost 可用；不要直接双击 HTML。端口占用时可用 `python3 scripts/serve.py --port 8001`。
+Open [localhost:8000](http://127.0.0.1:8000). WebGPU requires a secure context; localhost works. Do not open the HTML file directly. If the port is occupied, use `python3 scripts/serve.py --port 8001`.
 
-初始化脚本下载并校验旧版间接依赖 HarfBuzz，在本项目 `.deps` 中做当前编译器所需的兼容迁移，再执行 `moon update` 和检查。`moon.work` 引用这个本地副本，因此首次运行不能跳过初始化。全局工具链和缓存保持原样。确切依赖及补丁说明见 [DEPENDENCIES.txt](DEPENDENCIES.txt) 和 [THIRD_PARTY.md](THIRD_PARTY.md)。
+The bootstrap script downloads and verifies the legacy HarfBuzz transitive dependency, applies compatibility changes inside this project's `.deps` directory, then runs `moon update` and checks. The workspace references this local copy, so bootstrap is required on the first run. The global toolchain and dependency cache are not modified. See [DEPENDENCIES.txt](DEPENDENCIES.txt) and [THIRD_PARTY.md](THIRD_PARTY.md) for exact versions and patch details.
 
-静态分发包：
+To create a static distribution:
 
 ```sh
 python3 scripts/package.py
 python3 scripts/serve.py --dist
 ```
 
-生成的 `dist/` 可以由普通静态服务器提供；远程部署需要 HTTPS。
+The generated `dist/` directory can be served by an ordinary static server. Remote deployments require HTTPS.
 
-## 操作
+## Controls
 
-| 按键 | 行为 |
+| Key | Action |
 | --- | --- |
-| A / D 或左右箭头 | 移动 |
-| W | 跳跃；松开后才能再次跳跃 |
-| S | 单向平台上按下可落下；其他地方按住下蹲慢走，松开后有空间才站起 |
-| 空格（按住） | 获得道具或勾选 Debug 后全世界 6× 快进；当前角色记录等待输入，松开恢复 1× |
-| Backspace | 清空历史，重新开始当前关卡 |
-| Escape | 暂停 / 继续 |
-| 空格（失败时重新按下） | 清空历史，重新挑战本关；按住不会立即快进 |
-| Enter | 暂停时继续 |
-| 1 / 2 / 3 / 4 | 调试切关：练习 / 断桥 / 三道机关 / 双开关，清空历史 |
+| A / D or Left / Right | Move |
+| W | Jump; release before jumping again |
+| S | Drop through the one-way platform beneath you; elsewhere, hold to crouch and move slowly. Stand on release when there is enough clearance. |
+| Space, held | Advance the world at 6x after collecting the item or enabling Debug. The current character records neutral input. Release to return to 1x. |
+| Backspace | Clear recorded history and restart the current level |
+| Escape | Pause / resume |
+| Space, newly pressed after failure | Clear history and retry the current level. Holding it through the retry does not immediately accelerate time. |
+| Enter | Resume from pause |
+| 1 / 2 / 3 / 4 | Debug level selection: practice / broken bridge / three gates / dual switches. Clears recorded history. |
 
-每条生命在约三个人身宽的范围内随机错位出生，从地面上方 54–74 像素的随机高度自然落下；同一生命回放时保留原来的出生点。落地后可按 W 起跳。
+Each life spawns at a slightly different position within an area roughly three characters wide, falling naturally from a random height 54-74 pixels above the ground. Replays preserve that life's original spawn position. Press W after landing to jump.
 
-踏板踩上即生效。当前可操作的人物固定为橙色；旧生命和被波冻结的人物统一为灰紫色，当前角色头顶有小标记。角色采用简洁线条小人，站立时轻微呼吸、行走时摆臂迈步，头部和脚尖显示朝向；停下后保留最后朝向。顶着障碍按方向键时仍继续行走动画，历史角色也遵循同一规则。下蹲时碰撞高度从 38 缩为 24 像素，移动速度约为正常走路的四分之一，迈步节奏放慢一半，仍可压住踏板；历史会重放下蹲。历史输入播放结束后，角色消失并释放踏板。切离窗口自动暂停。
+Pressure plates activate when stepped on. The current character is orange with a small marker overhead; past lives and characters frozen by the wave are gray-purple. The simple line figures breathe while idle and swing their arms and legs while walking. Their heads and feet indicate facing direction, which remains unchanged when they stop. Holding a movement key against an obstacle still plays the walking animation, including during replays.
 
-## 四关与解法
+Crouching reduces collision height from 38 to 24 pixels, slows movement to roughly one-quarter of normal speed, and halves the walking animation rate. Crouching characters can still activate plates, and past lives replay crouch inputs. When a recording ends, its character disappears and releases any plate. Leaving the window automatically pauses the game.
 
-1. **练习**：向右移动，跳上两层台阶，到青色虚线平台上按 S 落下，向右拾取爱心，再接触出口。爱心使生命从 1 增至 2，同一次挑战只能拾取一次，重试本关会恢复。
-2. **断桥**：第一条一直按 D 约 6 秒，即使被挡住也继续按，然后松开 D，等待下一条生命（Debug 模式下可按住空格加速）。第二条向左站上压力板，历史角色用同一段右移输入通过桥到达出口。
-3. **起伏通道**：三个高低不同的平台分别放置踏板，连线指向对应的橙色卷闸。前两块踏板在通道外，第三块在第一、第二道门之间的抬高地面上。通道有上台阶、下落和再次跳上高台的路线，没有断桥。踩住踏板使门逐渐升起，离开后立即逐渐下降，不设延迟关闭。
-4. **错开的开关**：第一条站上左板后等待换命；第二条站上中板后等待换命。第三条向右跑，两条历史同时占板，打开出口通道。
+## Levels and solutions
 
-第三关的一种可复现解法：第一条录制持续向右，并在开始右移后约 2 秒、3.3 秒分别按一次 W，继续右移至约 5.3 秒，再快进换命。第一遍会被关着的第一道门挡住。第二条落地后向左跳上最低的外侧踏板，短暂停留至本轮约 1.5 秒，再向右跳上第二个平台并停住。历史角色因此跨过第一道门、跳上通道里的第三块踏板，再跳过后面的高台到达出口。踩板过晚会让历史中的跳跃发生在错误的位置；本关只有两条生命，配合失败后需重试。完整的逐帧解法和错时失败用例见 `sim/tunnel_test.mbt`。
+1. **Practice:** Move right, jump up the two steps, and press S on the cyan dashed platform to drop through it. Continue right to collect the heart and reach the exit. The heart increases the life limit from one to two and can only be collected once per attempt; retrying restores it.
+2. **Broken bridge:** During the first life, hold D for about six seconds, continuing even after the barrier stops you. Release D and wait for the next life; Debug mode allows Space to accelerate this wait. During the second life, move left onto the pressure plate. Your past self replays the same rightward input, crosses the bridge, collects the acceleration item, and reaches the exit.
+3. **Stepped passage:** Three plates sit on platforms at different heights, with lines connecting them to their orange gates. The first two plates are outside the passage. The third sits on raised ground between the first and second gates. The passage requires climbing, dropping, and jumping onto another raised section; there is no broken bridge. Gates rise gradually while their plates are held and immediately begin descending when released, without a closing delay.
+4. **Staggered switches:** Use the first life to stand on the left plate and wait for the next life. Use the second to stand on the middle plate and wait again. During the third, run right while both past selves hold their plates to open the exit route.
 
-任意有效角色触碰出口都会立即进入下一关，第四关后回练习关。生命用尽后显示 Game Over，松开空格并重新按下即可重试，Backspace 也可以重开。
+One reproducible solution for level 3: record continuous rightward movement in the first life, pressing W roughly 2 and 3.3 seconds after starting to move. Continue right until about 5.3 seconds, then accelerate to the next life. The first attempt remains blocked by the closed first gate. In the second life, land, jump left onto the lowest outside plate, and stay until roughly 1.5 seconds into the loop. Jump right onto the second platform and stop. Your past self can now pass the first gate, jump onto the third plate inside the passage, and clear the remaining raised section to reach the exit. Late plate activation changes where the recorded jumps occur. With only two lives, mistiming requires a retry. See [sim/tunnel_test.mbt](sim/tunnel_test.mbt) for the precise input sequence and a mistimed failure case.
 
-## 实现与文件
+Any active, unfrozen character can trigger the exit. Completing level 4 returns to the practice level. After Game Over, release and press Space again to retry, or use Backspace.
+
+## Implementation and layout
 
 ```text
-sim/         纯 MoonBit 定点物理、输入历史、共享机关、60Hz 时间系统和测试
-game/        Selene App 系统、ECS Transform 投影、输入接入、场景绘制
-web/         官方 Selene WebGPU 平台覆盖与程序入口
-scripts/     依赖初始化、静态服务、打包、真实浏览器回归
-artifacts/qa/浏览器截图与结构化验收结果
-index.html   最小浏览器外壳
-moon.mod     固定依赖版本
-moon.work    旧间接依赖的局部兼容副本
+sim/          Pure MoonBit fixed-point physics, input history, shared mechanisms, 60 Hz simulation, and tests
+game/         Selene App systems, ECS Transform projection, input handling, and scene rendering
+web/          Official Selene WebGPU platform overrides and entry point
+scripts/      Dependency setup, local server, packaging, and browser regression checks
+artifacts/qa/ Generated browser screenshots and structured validation results
+index.html    Minimal browser shell
+moon.mod      Pinned dependency versions
+moon.work     Workspace including the local compatibility copy of a legacy dependency
 ```
 
-游戏逻辑、时间、碰撞、关卡和渲染指令均由 MoonBit 实现。少量 JS 处理浏览器外壳、Selene 缺少的按键、失焦事件和只读测试快照，冲击圆和人物由 Selene 按层次绘制；浏览器只按 MoonBit 计算的时钟路径和蓄积圆半径，对已渲染像素进行局部反色，不复制场景或执行游戏计时。历史中没有位置数据，也没有脚本通关或瞬移。
+MoonBit owns game logic, timing, collisions, levels, and rendering commands. A small amount of JavaScript handles the browser shell, missing Selene keys, focus events, and read-only test snapshots. Selene draws the shockwave and characters in order; the browser applies local color inversion to already rendered pixels using clock paths and charge radius calculated by MoonBit. It does not duplicate the scene or run gameplay timers. Recordings contain no positions, scripted solutions, or teleportation.
 
-## 验证
+## Validation
 
 ```sh
 moon fmt
@@ -96,11 +114,11 @@ moon test
 moon info
 ```
 
-纯游戏测试覆盖重演、改变历史结果、同步、1×/6× 完整状态一致性、冲击完成换命、生命耗尽、机关共享、世界重建、遍历顺序无关、记录不可变、历史到期、三道独立卷闸、松板立即渐闭、防夹和死亡 / 冲击批次边界。
+Simulation tests cover replay, changes to historical outcomes, synchronization, full-state equivalence at 1x and 6x, life transitions after impact, exhaustion of lives, shared mechanisms, world reconstruction, iteration-order independence, immutable recordings, expired replays, three independent gates, immediate gradual closure, anti-crush behavior, and stopping batches at death or impact boundaries.
 
-模拟及呈现数学回归共 57 项，覆盖四关解法、64 组不同出生随机种子下的练习关和第三关解法、单向平台穿透与回放、爱心只拾取一次，首次倒带教学时长，以及机关时机错误时无法通关的情况。真实浏览器验收使用键盘和渲染像素，结果写入 `artifacts/qa/browser-results.json`。首次安装日志保存在 `artifacts/qa/clean-install.log`。
+The simulation and presentation math suites contain **57 tests**. They cover solutions for all four levels, practice and level 3 solutions across 64 spawn seeds, one-way platform passage and replay, one-time heart collection, the first-rewind teaching sequence, and failed solutions caused by incorrect timing. Browser checks use real keyboard input and rendered pixels. Results are written to `artifacts/qa/browser-results.json`; the initial setup log is stored locally at `artifacts/qa/clean-install.log`.
 
-真实浏览器回归需要额外安装 Python Playwright 与 Chromium；这是测试工具，不是游戏运行依赖。保持本地服务运行，然后：
+Browser regression checks additionally require Python Playwright and Chromium. These are test tools, not runtime dependencies. Keep the local server running, then execute:
 
 ```sh
 python3 -m pip install playwright Pillow
@@ -112,14 +130,14 @@ python3 scripts/qa_heart_rewind.py
 python3 scripts/qa_retry.py
 ```
 
-这些脚本通过真实键盘事件完成四关，只读取 MoonBit 发布的快照，不注入游戏状态。结果保存在 `artifacts/qa/browser-results.json`，截图保存在同一目录。
+The scripts play through levels using real key events and only read MoonBit-published snapshots; they do not inject game state. Screenshots and structured results are generated under `artifacts/qa/`, which is excluded from version control.
 
-## 已知边界
+## Known limitations
 
-- 面向桌面键盘和 WebGPU，没有触屏操作或非 WebGPU 后备渲染。
-- 历史和道具仅保存在内存，没有存档系统；刷新页面清空进度与道具并从练习关开始。每条记录最多 1092 帧。
-- 大幅掉帧时限制单次追赶时长，模拟会相对现实变慢，但不会跳过历史输入帧。
-- 角色互不碰撞；第三关卷闸下降时若下一位置会夹住角色，会在该位置等待角色离开。
-- 上游间接依赖 `hackwaly/moonback@0.8.1` 会产生弃用提示，不影响已验证的构建和运行。
+- Desktop keyboard and WebGPU are required. There are no touch controls or non-WebGPU rendering fallback.
+- History and inventory exist only in memory. There is no save system; refreshing clears progress and items and returns to the practice level. Each recording contains at most 1,092 frames.
+- Long frames have a capped catch-up interval. Simulation may run slower than wall-clock time, but recorded input frames are never skipped.
+- Characters do not collide with one another. A descending gate in level 3 waits if its next position would overlap a character, then continues after the character moves away.
+- The upstream transitive dependency `hackwaly/moonback@0.8.1` emits a deprecation warning. It does not prevent the verified build from running.
 
-架构与确定性规则见 [DESIGN.md](DESIGN.md)。
+See [DESIGN.md](DESIGN.md) for architecture and determinism rules. That document is maintained in Chinese.
