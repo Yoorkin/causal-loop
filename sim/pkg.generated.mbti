@@ -1,0 +1,116 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "yorkin/causal_loop/sim"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn gate_body(Rect, Int) -> Rect
+
+pub fn level_for_number(Int) -> Int
+
+pub fn level_geometry(Int) -> Level
+
+pub fn level_number(Int) -> Int
+
+// Errors
+
+// Types and methods
+pub struct ActorView {
+  id : Int
+  x : Int
+  y : Int
+  vy : Int
+  grounded : Bool
+  active : Bool
+  facing : Int
+  walking : Bool
+  stride : Int
+  crouching : Bool
+  frozen_at : Int
+} derive(Eq, ToJson, @debug.Debug)
+
+type Game derive(Eq, @debug.Debug)
+pub fn Game::advance_batch(Self, Input, Bool, debug? : Bool) -> Unit
+pub fn Game::end_life(Self) -> Unit
+pub fn Game::new(Int, seed? : UInt, inventory? : Inventory) -> Self
+pub fn Game::snapshot(Self) -> Snapshot
+pub fn Game::step(Self, Input) -> Unit
+
+pub(all) struct Input {
+  axis : Int
+  jump : Bool
+  crouch : Bool
+} derive(Eq, @debug.Debug)
+pub fn Input::wait() -> Self
+
+pub(all) struct Inventory {
+  time_acceleration : Bool
+} derive(Eq, ToJson, @debug.Debug)
+pub fn Inventory::contains(Self, ItemKind) -> Bool
+pub fn Inventory::empty() -> Self
+
+pub(all) enum ItemKind {
+  TimeAcceleration
+} derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct ItemPickup {
+  kind : ItemKind
+  bounds : Rect
+} derive(Eq, @debug.Debug)
+
+pub struct Level {
+  id : Int
+  platforms : ReadOnlyArray[Rect]
+  ceilings : ReadOnlyArray[Rect]
+  drop_platforms : ReadOnlyArray[Rect]
+  heart : Rect?
+  items : ReadOnlyArray[ItemPickup]
+  plate_a : Rect
+  plate_b : Rect
+  plate_c : Rect
+  gates : ReadOnlyArray[Rect]
+  bridge : Rect
+  barrier : Rect
+  exit : Rect
+} derive(Eq, @debug.Debug)
+
+pub(all) enum Outcome {
+  Playing
+  Won
+  Lost
+} derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct Rect {
+  x : Int
+  y : Int
+  w : Int
+  h : Int
+} derive(Eq, @debug.Debug)
+pub fn Rect::touches(Self, Self) -> Bool
+
+pub struct Snapshot {
+  level : Int
+  life : Int
+  max_lives : Int
+  heart_collected : Bool
+  inventory : Inventory
+  wave_start_tick : Int
+  wave_end_tick : Int
+  wave_radius : Int
+  tick : Int
+  outcome : Outcome
+  actors : ReadOnlyArray[ActorView]
+  history_lengths : ReadOnlyArray[Int]
+  recording_length : Int
+  plate_a : Bool
+  plate_b : Bool
+  plate_c : Bool
+  gate_openings : ReadOnlyArray[Int]
+  bridge_open : Bool
+} derive(Eq, ToJson, @debug.Debug)
+
+// Type aliases
+
+// Traits

@@ -1,0 +1,4 @@
+///|
+fn main {
+  @game.run()
+}

@@ -1,0 +1,2 @@
+// Derives are used as traits, not as the legacy promoted method surface.
+warnings = "-implicit_impl_as_method"

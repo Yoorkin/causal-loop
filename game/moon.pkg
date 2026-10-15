@@ -1,0 +1,16 @@
+import {
+  "moonbitlang/core/math" @trig,
+  "yorkin/causal_loop/sim",
+  "Milky2018/selene/app",
+  "Milky2018/selene/asset",
+  "Milky2018/selene/inputs",
+  "Milky2018/selene/time",
+  "Milky2018/selene/render",
+  "Milky2018/selene/render2d",
+  "Milky2018/selene/render_submit",
+  "Milky2018/selene/math",
+  "Milky2018/selene/entity",
+  "Milky2018/selene/transform",
+}
+
+supported_targets = "js"

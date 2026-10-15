@@ -1,0 +1,11 @@
+_build/
+target/
+.mooncakes/
+.repos/
+node_modules/
+.DS_Store
+dist/
+.deps/
+artifacts/
+__pycache__/
+*.py[cod]

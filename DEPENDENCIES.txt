@@ -1,0 +1,45 @@
+Verified 2026-10-14 (Asia/Shanghai)
+Moon: 0.1.20261012 (748b63c)
+Moonc: v0.10.15+943464bfa
+Selene official commit: 16e4a933c05165c3d668a697e8532ab464e911a7
+
+yorkin/causal_loop@0.1.0 (local <project>) [workspace member]:
+├─ Milky2018/selene -> Milky2018/selene@0.37.3
+│  ├─ Milky2018/chicle -> Milky2018/chicle@0.6.1
+│  │  └─ moonbit-community/yaml -> moonbit-community/yaml@0.0.6
+│  ├─ Milky2018/moon_accesskit -> Milky2018/moon_accesskit@0.4.1
+│  │  └─ moonbitlang/x -> moonbitlang/x@0.5.1
+│  ├─ Milky2018/moon_rapier -> Milky2018/moon_rapier@0.5.1
+│  ├─ Milky2018/xml -> Milky2018/xml@0.4.1
+│  │  └─ moonbitlang/x -> moonbitlang/x@0.5.1
+│  ├─ Milky2018/zstd -> Milky2018/zstd@0.1.2
+│  ├─ gmlewis/base64 -> gmlewis/base64@0.16.12
+│  ├─ gmlewis/flate -> gmlewis/flate@0.36.13
+│  │  └─ gmlewis/io -> gmlewis/io@0.23.16
+│  │     └─ gmlewis/base64 -> gmlewis/base64@0.16.12
+│  ├─ gmlewis/gzip -> gmlewis/gzip@0.34.13
+│  │  ├─ gmlewis/base64 -> gmlewis/base64@0.16.12
+│  │  ├─ gmlewis/crc32 -> gmlewis/crc32@0.8.18
+│  │  ├─ gmlewis/flate -> gmlewis/flate@0.36.13 (*)
+│  │  ├─ gmlewis/io -> gmlewis/io@0.23.16 (*)
+│  │  └─ moonbitlang/x -> moonbitlang/x@0.5.1
+│  ├─ gmlewis/io -> gmlewis/io@0.23.16 (*)
+│  └─ moonbitlang/x -> moonbitlang/x@0.5.1
+├─ Milky2018/selene_webgpu -> Milky2018/selene_webgpu@0.37.3
+│  ├─ Milky2018/moon_cosmic -> Milky2018/moon_cosmic@0.3.4
+│  │  ├─ Milky2018/moon_skrifa -> Milky2018/moon_skrifa@0.1.9
+│  │  ├─ Milky2018/moon_swash -> Milky2018/moon_swash@0.1.11
+│  │  │  ├─ Milky2018/moon_skrifa -> Milky2018/moon_skrifa@0.1.9
+│  │  │  ├─ Milky2018/moon_yazi -> Milky2018/moon_yazi@0.1.3
+│  │  │  └─ Milky2018/moon_zeno -> Milky2018/moon_zeno@0.1.4
+│  │  ├─ Milky2018/moon_zeno -> Milky2018/moon_zeno@0.1.4
+│  │  ├─ moonbit-community/harfbuzz -> moonbit-community/harfbuzz@0.1.0 (local <project>/.deps/harfbuzz) [workspace member]
+│  │  └─ moonbitlang/x -> moonbitlang/x@0.5.1
+│  ├─ Milky2018/selene -> Milky2018/selene@0.37.3 (*)
+│  ├─ moonbit-community/js-ffi -> moonbit-community/js-ffi@0.4.3
+│  └─ moonbit-community/rabbita -> moonbit-community/rabbita@0.15.6
+│     ├─ hackwaly/moonback -> hackwaly/moonback@0.8.1
+│     │  └─ moonbitlang/async -> moonbitlang/async@0.21.0
+│     ├─ moonbitlang/async -> moonbitlang/async@0.21.0
+│     └─ moonbitlang/x -> moonbitlang/x@0.5.1
+└─ moonbit-community/js-ffi -> moonbit-community/js-ffi@0.4.3
