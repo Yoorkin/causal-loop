@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Game Demo</title>
+<link rel="icon" href="data:,">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: #0b1118; color: #e8eee9; display: grid; place-items: center; font-family: sans-serif; }
+  main { width: min(1120px, 100%); }
+  #stage { position: relative; overflow: hidden; isolation: isolate; }
+  canvas { display: block; width: 100%; height: auto; outline: none; }
+  #loop-clock { position: absolute; left: 50%; top: 50%; width: 7.857142857%; height: auto; transform: translate(-50%, -50%); pointer-events: none; mix-blend-mode: difference; }
+  #charge-disc { position: absolute; left: 50%; top: 50%; width: 0; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none; backdrop-filter: invert(1); -webkit-backdrop-filter: invert(1); }
+  #boot { padding: 20px; text-align: center; color: #91a5b2; }
+  #debug-control { position: fixed; top: 12px; right: 16px; display: flex; gap: 6px; align-items: center; font-size: 12px; color: #91a5b2; user-select: none; }
+  #debug-mode { margin: 0; accent-color: #67dfdc; }
+</style>
+<main>
+  <div id="stage">
+    <canvas id="canvas" width="1120" height="620" tabindex="0" aria-label="Game canvas. Use the keyboard to play."></canvas>
+    <svg id="loop-clock" viewBox="0 0 88 88" aria-hidden="true">
+      <defs><mask id="clock-foreground-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="88" height="88"><rect width="88" height="88" fill="white"/><path id="clock-heart-mask" fill="black" opacity="0" d="M12 21 3.2 12.5C-3 6.4 5.5-1.7 12 5.2 18.5-1.7 27 6.4 20.8 12.5Z"/></mask></defs>
+      <g mask="url(#clock-foreground-mask)"><path id="clock-shape" fill="white" /></g>
+    </svg>
+    <div id="charge-disc" aria-hidden="true"></div>
+  </div>
+  <div id="boot" hidden></div>
+</main>
+<label id="debug-control"><input id="debug-mode" type="checkbox">Debug</label>
+<script>
+  // Browser shell only: prevent navigation keys and report startup errors.
+  addEventListener('keydown', e => {
+    if (['Space', 'Backspace', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.code)) e.preventDefault();
+  });
+  const bootError = message => { const b = document.getElementById('boot'); b.hidden = false; b.textContent = 'Startup error: ' + message; };
+  addEventListener('error', e => bootError(e.message));
+  addEventListener('unhandledrejection', e => bootError(e.reason));
+  if (!navigator.gpu) bootError('WebGPU is unavailable. Open this page in a desktop browser with WebGPU support.');
+</script>
+<script src="game.js" defer></script>
+</html>
