@@ -1,6 +1,6 @@
 ///|
 test "B - same recorded right input crosses only after the present opens the bridge" {
-  let game = @sim.Game::new(1)
+  let game = @sim.Game::new(1, progress=@sim.RunProgress::new(heart_capacity=2))
   for _ in 0..<360 {
     game.step({ crouch: false, axis: 1, jump: false, })
   }
@@ -24,7 +24,7 @@ test "B - same recorded right input crosses only after the present opens the bri
 
 ///|
 test "without changing the environment the first history remains blocked" {
-  let game = @sim.Game::new(1)
+  let game = @sim.Game::new(1, progress=@sim.RunProgress::new(heart_capacity=2))
   for _ in 0..<360 {
     game.step({ crouch: false, axis: 1, jump: false, })
   }

@@ -1,6 +1,6 @@
 ///|
 test "entering any room does not grant acceleration and debug does not collect an item" {
-  for level in 0..<=3 {
+  for level in 0..<=4 {
     let game = Game::new(level)
     assert_false(game.inventory.time_acceleration)
     let x = game.actors[0].x
@@ -16,10 +16,14 @@ test "entering any room does not grant acceleration and debug does not collect a
 }
 
 ///|
-test "the end-of-bridge pickup can be collected by an active history and is idempotent" {
-  let game = Game::new(1)
+test "the left-bank pickup is reachable before the barrier and active histories can collect it once" {
+  let game = Game::new(1, progress=RunProgress::new(heart_capacity=2))
+  let level = level_geometry(1)
+  let pickup = level.items[0].bounds
+  assert_true(pickup.x + pickup.w < level.barrier.x)
+  assert_true(pickup.x + pickup.w < level.bridge.x)
   game.end_life()
-  game.actors[0].x = 9500
+  game.actors[0].x = pickup.x
   game.actors[0].y = 4620
   game.actors[0].frozen_at = 100
   game.resolve_puzzle()
@@ -34,14 +38,19 @@ test "the end-of-bridge pickup can be collected by an active history and is idem
 
 ///|
 test "owned items survive death and can be carried through retry and any room without a save" {
-  let game = Game::new(1, inventory={ time_acceleration: true, })
+  let game = Game::new(
+    1,
+    progress=RunProgress::new(heart_capacity=2, inventory={
+      time_acceleration: true,
+    }),
+  )
   game.end_life()
   assert_true(game.inventory.time_acceleration)
   game.end_life()
   assert_eq(game.outcome, Lost)
   assert_true(game.inventory.time_acceleration)
-  for level in 0..<=3 {
-    let carried = Game::new(level, inventory=game.snapshot().inventory)
+  for level in 0..<=4 {
+    let carried = Game::new(level, progress=game.progress())
     carried.advance_batch(Input::wait(), true)
     assert_eq(carried.tick, 6)
     assert_true(carried.inventory.time_acceleration)
@@ -51,7 +60,7 @@ test "owned items survive death and can be carried through retry and any room wi
 
 ///|
 test "item collection depends on pickup contact rather than level number" {
-  for level in 0..<=3 {
+  for level in 0..<=4 {
     let game = Game::new(level)
     let pickup : ItemPickup = {
       kind: TimeAcceleration,

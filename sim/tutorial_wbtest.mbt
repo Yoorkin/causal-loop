@@ -37,7 +37,7 @@ fn reach_tutorial_drop(game : Game) -> Unit raise {
 }
 
 ///|
-test "tutorial route requires jumps and S, grants one heart and reaches the exit across seeds" {
+test "tutorial route reaches the exit with one filled heart and two containers across seeds" {
   for seed in 0U..<64U {
     let game = Game::new(0, seed~)
     assert_eq(game.max_lives, 1)
@@ -53,14 +53,24 @@ test "tutorial route requires jumps and S, grants one heart and reaches the exit
     }
     assert_eq(game.actors[0].x, x)
     assert_eq(game.actors[0].y, 5220)
-    for _ in 0..<140 {
+    for _ in 0..<60 {
       game.step({ axis: 1, jump: false, crouch: false, })
+    }
+    assert_eq(game.actors[0].x, 7760)
+    assert_false(game.actors[0].crouching)
+    for _ in 0..<360 {
+      game.step({
+        axis: 1,
+        jump: false,
+        crouch: game.actors[0].x >= 7600 && game.actors[0].x < 8540,
+      })
       if game.outcome == Won {
         break
       }
     }
     assert_true(game.heart_collected)
     assert_eq(game.max_lives, 2)
+    assert_eq(game.snapshot().remaining_lives, 1)
     assert_eq(game.outcome, Won)
     assert_eq(game.histories.length(), 0)
   }
@@ -95,24 +105,37 @@ test "walking cannot bypass tutorial jumps or enter the lower exit corridor" {
 }
 
 ///|
-test "collected heart grants an actual retry and cannot be farmed after rewind" {
+test "the practice container adds an empty slot and cannot cause a tutorial rewind" {
+  assert_eq(level_geometry(1).heart, None)
+  guard level_geometry(0).heart is Some(heart) else {
+    fail("practice must contain the first heart container")
+  }
+  assert_true(heart.bounds.x + heart.bounds.w < level_geometry(0).exit.x)
   let game = Game::new(0)
-  game.actors[0].x = 9400
-  game.actors[0].y = 5220
-  game.step(Input::wait())
-  assert_eq(game.max_lives, 2)
+  reach_tutorial_drop(game)
+  game.step({ axis: 0, jump: false, crouch: true, })
   for _ in 0..<60 {
     game.step(Input::wait())
   }
+  for _ in 0..<360 {
+    game.step({
+      axis: 1,
+      jump: false,
+      crouch: game.actors[0].x >= 7600 && game.actors[0].x < 8540,
+    })
+    if game.heart_collected {
+      break
+    }
+  }
+  assert_true(game.heart_collected)
   assert_eq(game.max_lives, 2)
-  game.end_life()
-  assert_eq(game.outcome, Playing)
-  assert_eq(game.snapshot().life, 2)
-  game.actors[1].x = 9400
-  game.actors[1].y = 5220
-  game.step(Input::wait())
+  assert_eq(game.snapshot().remaining_lives, 1)
+  for _ in 0..<WaveEndTick {
+    game.step(Input::wait())
+  }
   assert_eq(game.max_lives, 2)
-  game.end_life()
+  assert_eq(game.snapshot().life, 1)
+  assert_eq(game.snapshot().remaining_lives, 0)
   assert_eq(game.outcome, Lost)
   let retry = Game::new(0)
   assert_eq(retry.max_lives, 1)
@@ -121,16 +144,16 @@ test "collected heart grants an actual retry and cannot be farmed after rewind" 
 
 ///|
 test "recorded S drop replays through the platform with the same physics" {
-  let game = Game::new(0)
+  let game = Game::new(0, progress=RunProgress::new(heart_capacity=2))
   reach_tutorial_drop(game)
   game.step({ axis: 0, jump: false, crouch: true, })
   for _ in 0..<60 {
     game.step(Input::wait())
   }
-  for _ in 0..<80 {
+  for _ in 0..<60 {
     game.step({ axis: 1, jump: false, crouch: false, })
   }
-  assert_true(game.heart_collected)
+  assert_false(game.heart_collected)
   assert_eq(game.outcome, Playing)
   let original = game.snapshot().actors[0]
   let ticks = game.tick

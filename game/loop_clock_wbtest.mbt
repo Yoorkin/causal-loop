@@ -93,7 +93,7 @@ test "clock warning starts four seconds before the impact and stops on impact" {
 
 ///|
 test "hour hand follows minute progress forward and backward for each level" {
-  for index, level in [0, 1, 3, 2] {
+  for index, level in [0, 1, 3, 2, 4] {
     let start = index.to_double() * 30.0
     assert_eq(clock_hour_degrees(level, 0.0), start)
     assert_eq(clock_hour_degrees(level, 0.5), start + 15.0)

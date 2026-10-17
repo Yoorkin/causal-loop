@@ -6,13 +6,21 @@ import {
 }
 
 // Values
+pub fn debug_checkpoint(Int) -> RunProgress
+
 pub fn gate_body(Rect, Int) -> Rect
+
+pub fn is_rigid_room(Int) -> Bool
 
 pub fn level_for_number(Int) -> Int
 
 pub fn level_geometry(Int) -> Level
 
 pub fn level_number(Int) -> Int
+
+pub fn next_level(Int) -> Int
+
+pub fn stack_room_crates() -> ReadOnlyArray[Rect]
 
 // Errors
 
@@ -31,12 +39,23 @@ pub struct ActorView {
   frozen_at : Int
 } derive(Eq, ToJson, @debug.Debug)
 
+pub(all) struct CrateView {
+  id : Int
+  bounds : Rect
+} derive(Eq, ToJson, @debug.Debug)
+
 type Game derive(Eq, @debug.Debug)
-pub fn Game::advance_batch(Self, Input, Bool, debug? : Bool) -> Unit
+pub fn Game::advance_batch(Self, Input, Bool, debug? : Bool, physics? : (Snapshot, ReadOnlyArray[Input]) -> PhysicsFrame, before_step? : (Snapshot) -> Unit) -> Unit
 pub fn Game::end_life(Self) -> Unit
-pub fn Game::new(Int, seed? : UInt, inventory? : Inventory) -> Self
+pub fn Game::new(Int, seed? : UInt, progress? : RunProgress) -> Self
+pub fn Game::progress(Self) -> RunProgress
 pub fn Game::snapshot(Self) -> Snapshot
-pub fn Game::step(Self, Input) -> Unit
+pub fn Game::step(Self, Input, physics? : (Snapshot, ReadOnlyArray[Input]) -> PhysicsFrame) -> Unit
+
+pub struct HeartPickup {
+  id : String
+  bounds : Rect
+} derive(Eq, @debug.Debug)
 
 pub(all) struct Input {
   axis : Int
@@ -62,19 +81,31 @@ pub(all) struct ItemPickup {
 
 pub struct Level {
   id : Int
+  spawn_offset : (Int, Int)
+  moving_platforms : ReadOnlyArray[MovingPlatform]
   platforms : ReadOnlyArray[Rect]
   ceilings : ReadOnlyArray[Rect]
   drop_platforms : ReadOnlyArray[Rect]
-  heart : Rect?
+  heart : HeartPickup?
   items : ReadOnlyArray[ItemPickup]
   plate_a : Rect
   plate_b : Rect
   plate_c : Rect
+  plate_d : Rect
   gates : ReadOnlyArray[Rect]
   bridge : Rect
   barrier : Rect
   exit : Rect
 } derive(Eq, @debug.Debug)
+
+pub struct MovingPlatform {
+  bounds : Rect
+  travel_x : Int
+  travel_ticks : Int
+  pause_ticks : Int
+  phase : Int
+} derive(Eq, @debug.Debug)
+pub fn MovingPlatform::at(Self, Int) -> Rect
 
 pub(all) enum Outcome {
   Playing
@@ -82,18 +113,40 @@ pub(all) enum Outcome {
   Lost
 } derive(Eq, ToJson, @debug.Debug)
 
+pub(all) struct PhysicsActor {
+  id : Int
+  x : Int
+  y : Int
+  vy : Int
+  grounded : Bool
+  crouching : Bool
+} derive(Eq, @debug.Debug)
+
+pub(all) struct PhysicsFrame {
+  crates : ReadOnlyArray[CrateView]
+  actors : ReadOnlyArray[PhysicsActor]
+}
+
 pub(all) struct Rect {
   x : Int
   y : Int
   w : Int
   h : Int
-} derive(Eq, @debug.Debug)
+} derive(Eq, ToJson, @debug.Debug)
 pub fn Rect::touches(Self, Self) -> Bool
+
+pub struct RunProgress {
+  heart_capacity : Int
+  inventory : Inventory
+  collected_hearts : ReadOnlyArray[String]
+} derive(Eq, ToJson, @debug.Debug)
+pub fn RunProgress::new(heart_capacity? : Int, inventory? : Inventory) -> Self
 
 pub struct Snapshot {
   level : Int
   life : Int
   max_lives : Int
+  remaining_lives : Int
   heart_collected : Bool
   inventory : Inventory
   wave_start_tick : Int
@@ -102,11 +155,13 @@ pub struct Snapshot {
   tick : Int
   outcome : Outcome
   actors : ReadOnlyArray[ActorView]
+  crates : ReadOnlyArray[CrateView]
   history_lengths : ReadOnlyArray[Int]
   recording_length : Int
   plate_a : Bool
   plate_b : Bool
   plate_c : Bool
+  plate_d : Bool
   gate_openings : ReadOnlyArray[Int]
   bridge_open : Bool
 } derive(Eq, ToJson, @debug.Debug)

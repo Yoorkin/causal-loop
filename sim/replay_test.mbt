@@ -1,6 +1,6 @@
 ///|
 test "A - replay identical input through identical physics" {
-  let game = @sim.Game::new(1)
+  let game = @sim.Game::new(1, progress=@sim.RunProgress::new(heart_capacity=2))
   let inputs : Array[@sim.Input] = [
     for tick in 0..<300 => {
       {
@@ -29,7 +29,7 @@ test "A - replay identical input through identical physics" {
 
 ///|
 test "history expires instead of holding its last input forever" {
-  let game = @sim.Game::new(1)
+  let game = @sim.Game::new(1, progress=@sim.RunProgress::new(heart_capacity=2))
   for _ in 0..<10 {
     game.step({ crouch: false, axis: 1, jump: false, })
   }

@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>因果回廊 · Causal Loop</title>
+<title>Game Demo</title>
 <link rel="icon" href="data:,">
 <style>
   * { box-sizing: border-box; }
@@ -18,7 +18,7 @@
 </style>
 <main>
   <div id="stage">
-    <canvas id="canvas" width="1120" height="620" tabindex="0" aria-label="因果回廊游戏画面，使用键盘操作"></canvas>
+    <canvas id="canvas" width="1120" height="620" tabindex="0" aria-label="Game canvas. Use the keyboard to play."></canvas>
     <svg id="loop-clock" viewBox="0 0 88 88" aria-hidden="true">
       <defs><mask id="clock-foreground-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="88" height="88"><rect width="88" height="88" fill="white"/><path id="clock-heart-mask" fill="black" opacity="0" d="M12 21 3.2 12.5C-3 6.4 5.5-1.7 12 5.2 18.5-1.7 27 6.4 20.8 12.5Z"/></mask></defs>
       <g mask="url(#clock-foreground-mask)"><path id="clock-shape" fill="white" /></g>
@@ -33,10 +33,10 @@
   addEventListener('keydown', e => {
     if (['Space', 'Backspace', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.code)) e.preventDefault();
   });
-  const bootError = message => { const b = document.getElementById('boot'); b.hidden = false; b.textContent = '启动错误：' + message; };
+  const bootError = message => { const b = document.getElementById('boot'); b.hidden = false; b.textContent = 'Startup error: ' + message; };
   addEventListener('error', e => bootError(e.message));
   addEventListener('unhandledrejection', e => bootError(e.reason));
-  if (!navigator.gpu) bootError('此浏览器未提供 WebGPU，请在桌面 Chrome / Edge 中打开 localhost 页面。');
+  if (!navigator.gpu) bootError('WebGPU is unavailable. Open this page in a desktop browser with WebGPU support.');
 </script>
 <script src="_build/js/release/build/yorkin/causal_loop/web/web.js" defer></script>
 </html>

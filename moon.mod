@@ -4,7 +4,7 @@ version = "0.1.0"
 
 preferred_target = "js"
 
-description = "Causal Loop — deterministic input replay puzzle built with Selene"
+description = "An input replay puzzle prototype built with MoonBit and Selene"
 
 license = "Apache-2.0"
 

@@ -47,7 +47,7 @@ test "sealed input owns an immutable copy, not a live recording array" {
 
 ///|
 test "falling current actor ends its life; falling history does not end the current life" {
-  let game = Game::new(1)
+  let game = Game::new(1, progress=RunProgress::new(heart_capacity=2))
   game.actors[0].y = 6900
   game.step(Input::wait())
   assert_eq(game.snapshot().life, 2)
@@ -61,7 +61,7 @@ test "falling current actor ends its life; falling history does not end the curr
 
 ///|
 test "6x stops immediately at death without recording frames in the next life" {
-  let game = Game::new(1)
+  let game = Game::new(1, progress=RunProgress::new(heart_capacity=2))
   game.actors[0].y = 6900
   game.advance_batch(Input::wait(), true, debug=true)
   let view = game.snapshot()
@@ -132,11 +132,10 @@ test "closing gate waits for an overlapping body and then immediately resumes" {
 
 ///|
 test "D extended - three moving gates and two histories agree at 1x and 6x" {
-  let normal = Game::new(3)
-  let fast = Game::new(3)
+  let normal = Game::new(3, progress=RunProgress::new(heart_capacity=3))
+  let fast = Game::new(3, progress=RunProgress::new(heart_capacity=3))
   // Synthetic three-actor stress case; the playable tunnel has only two lives.
   for game in [normal, fast] {
-    game.max_lives = 3
     for route in 0..<2 {
       for t in 0..<720 {
         let x = game.actors[route].x

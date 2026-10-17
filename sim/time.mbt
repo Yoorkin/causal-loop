@@ -6,6 +6,8 @@ pub fn Game::advance_batch(
   input : Input,
   fast : Bool,
   debug~ : Bool = false,
+  physics? : (Snapshot, ReadOnlyArray[Input]) -> PhysicsFrame,
+  before_step? : (Snapshot) -> Unit,
 ) -> Unit {
   let fast = fast && (self.inventory.time_acceleration || debug)
   let life = self.histories.length()
@@ -15,12 +17,18 @@ pub fn Game::advance_batch(
     if self.outcome != Playing || self.histories.length() != life {
       break
     }
+    // Presentation can retain each ordinary frame, including all six frames
+    // of acceleration. These immutable views never drive input replay.
+    if before_step is Some(observe) {
+      observe(self.snapshot())
+    }
     self.step(
       if fast && self.tick < WaveStartTick {
         Input::wait()
       } else {
         input
       },
+      physics?,
     )
     if count > 1 && self.tick >= WaveStartTick {
       break

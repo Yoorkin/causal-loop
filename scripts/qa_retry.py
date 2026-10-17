@@ -20,8 +20,9 @@ with sync_playwright() as p:
         page.wait_for_function('() => {const d=document.querySelector("canvas").dataset; const s=JSON.parse(d.state); return ' + expr + ';}', timeout=20000)
 
     results = []
-    for number, level, lives in [(1, 0, 1), (2, 1, 2), (3, 3, 2), (4, 2, 3)]:
+    for number, level, lives in [(1, 0, 1), (2, 1, 2), (3, 3, 2), (4, 2, 2)]:
         page.locator('#debug-mode').check()
+        page.locator('#canvas').click()
         page.keyboard.press(str(number), delay=80)
         page.wait_for_timeout(50)
         assert read()['s']['level'] == level and read()['s']['max_lives'] == lives

@@ -143,3 +143,35 @@ fn draw_item_flight(flight : ItemFlight?, icon : @asset.ImageHandle) -> Unit {
     present_item_flight(false, 50.0, 40.0)
   }
 }
+
+///|
+fn draw_heart_pickup(
+  level : @sim.Level,
+  view : @sim.Snapshot,
+  heart : @asset.ImageHandle,
+) -> Unit {
+  if !view.heart_collected && level.heart is Some(heart_pickup) {
+    let pickup = heart_pickup.bounds
+    draw_pickup_light(level, pickup, 0xed5363)
+    @render2d.push_ui_image({
+      image: heart,
+      destination: {
+        position: @math.Vec2(
+          pickup.x.to_double() / 10.0,
+          pickup.y.to_double() / 10.0 + pickup_float(view.tick),
+        ),
+        size: @math.Vec2(
+          pickup.w.to_double() / 10.0,
+          pickup.h.to_double() / 10.0,
+        ),
+      },
+      source: None,
+      transform: @math.Transform(),
+      uv_transform: @math.Transform(),
+      repeat: NoRepeat,
+      alpha_mode: Blend,
+      blend_mode: Alpha,
+      color: color(0xed5363),
+    })
+  }
+}

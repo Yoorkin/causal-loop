@@ -4,7 +4,7 @@ fn Session::visible_snapshot(self : Session) -> @sim.Snapshot {
     self.rewind_elapsed <
     clock_zero_time(rewind_timing(view.level, view.life)) +
     rewind_timing(view.level, view.life).reset_delay {
-    view
+    self.scene_replay.at(view, self.rewind_elapsed)
   } else {
     self.game.snapshot()
   }
@@ -50,6 +50,19 @@ fn rewind_timing(level : Int32, life : Int32) -> RewindTiming {
 ///|
 fn clock_zero_time(timing : RewindTiming) -> Double {
   timing.hold_duration + timing.fade_duration
+}
+
+///|
+// The clock and the scene travel through the same fraction of the past life.
+fn rewind_remaining(elapsed : Double, timing : RewindTiming) -> Double {
+  if elapsed <= timing.hold_duration {
+    return 1.0
+  }
+  if elapsed >= clock_zero_time(timing) {
+    return 0.0
+  }
+  let t = (elapsed - timing.hold_duration) / timing.fade_duration
+  1.0 - t * t * (3.0 - 2.0 * t)
 }
 
 ///|
@@ -109,8 +122,7 @@ fn time_wave(
       phase: "resetting",
     }
   }
-  let t = (elapsed - timing.hold_duration) / timing.fade_duration
-  let remaining = 1.0 - t * t * (3.0 - 2.0 * t)
+  let remaining = rewind_remaining(elapsed, timing)
   {
     radius: 644.0,
     strength: remaining,

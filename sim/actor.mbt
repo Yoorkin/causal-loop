@@ -54,7 +54,7 @@ pub(all) struct Rect {
   y : Int32
   w : Int32
   h : Int32
-} derive(Debug, Eq)
+} derive(Debug, Eq, ToJson)
 
 ///|
 fn Actor::bounds(self : Actor) -> Rect {

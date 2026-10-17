@@ -11,6 +11,11 @@ import {
   "Milky2018/selene/math",
   "Milky2018/selene/entity",
   "Milky2018/selene/transform",
+  "Milky2018/selene/physics2d",
 }
+
+import {
+  "Milky2018/selene/ecs",
+} for "wbtest"
 
 supported_targets = "js"

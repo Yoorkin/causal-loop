@@ -7,7 +7,7 @@ extern "js" fn browser_events(
 ) -> Unit =
   #|(key, blur) => {
   #|  for (const type of ['keydown', 'keyup']) window.addEventListener(type, e => {
-  #|    if (['Backspace', 'Digit1', 'Digit2', 'Digit3', 'Digit4'].includes(e.code)) {
+  #|    if (['Backspace', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6'].includes(e.code)) {
   #|      e.preventDefault();
   #|      if (!e.repeat) key(e.code, type === 'keydown');
   #|    }
@@ -38,6 +38,14 @@ extern "js" fn publish_view(
 // consume the resulting immutable spawn choices, never browser randomness.
 extern "js" fn spawn_seed() -> UInt32 =
   #|() => Math.floor(Math.random() * 4294967296)
+
+///|
+extern "js" fn present_tutorial_hint(key : String, depth : Double) -> Unit =
+  #|(key, depth) => {
+  #|  const c = document.getElementById('canvas');
+  #|  c.dataset.tutorialKey = key;
+  #|  c.dataset.tutorialKeyDepth = String(depth);
+  #|}
 
 ///|
 extern "js" fn browser_debug(changed : (Bool) -> Unit) -> Unit =

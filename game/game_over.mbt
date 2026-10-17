@@ -37,7 +37,7 @@ fn draw_game_over(opacity : Double) -> Unit {
     },
   })
   @render2d.push_ui_text({
-    text: "space retry",
+    text: "Press Space to Retry",
     position: @math.Vec2(560.0, 450.0),
     transform: @math.Transform(),
     blend_mode: Alpha,

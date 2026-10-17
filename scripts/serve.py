@@ -22,7 +22,7 @@ class Handler(SimpleHTTPRequestHandler):
         super().end_headers()
 
 server = ThreadingHTTPServer(('127.0.0.1', args.port), partial(Handler, directory=str(root)))
-print(f'Causal Loop: http://127.0.0.1:{args.port}  (Ctrl-C to stop)', flush=True)
+print(f'Game Demo: http://127.0.0.1:{args.port}  (Ctrl-C to stop)', flush=True)
 try:
     server.serve_forever()
 except KeyboardInterrupt:

@@ -1,6 +1,6 @@
 ///|
 test "blocked movement keeps walking intent, facing and animated stride during replay" {
-  let game = @sim.Game::new(1)
+  let game = @sim.Game::new(1, progress=@sim.RunProgress::new(heart_capacity=2))
   for _ in 0..<180 {
     game.step({ crouch: false, axis: 1, jump: false, })
   }
@@ -24,7 +24,7 @@ test "blocked movement keeps walking intent, facing and animated stride during r
 
 ///|
 test "idle and airborne actors retain the last requested facing" {
-  let game = @sim.Game::new(2)
+  let game = @sim.Game::new(1)
   for _ in 0..<20 {
     game.step(@sim.Input::wait())
   }

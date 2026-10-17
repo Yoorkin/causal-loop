@@ -1,6 +1,6 @@
 ///|
 test "E - completed sweep seals a complete recording and resets the next life" {
-  let game = @sim.Game::new(1)
+  let game = @sim.Game::new(1, progress=@sim.RunProgress::new(heart_capacity=2))
   for _ in 0..<1091 {
     game.step(@sim.Input::wait())
   }
@@ -15,10 +15,13 @@ test "E - completed sweep seals a complete recording and resets the next life" {
 }
 
 ///|
-test "E - every level stops at its configured life limit and stays stopped" {
-  for level in [0, 1, 3, 2] {
-    let game = @sim.Game::new(level)
-    let limit = if level == 0 { 1 } else if level == 2 { 3 } else { 2 }
+test "E - every level stops at its supplied heart capacity and stays stopped" {
+  for level in [0, 1, 3, 2, 4] {
+    let limit = 3
+    let game = @sim.Game::new(
+      level,
+      progress=@sim.RunProgress::new(heart_capacity=limit),
+    )
     assert_eq(game.snapshot().max_lives, limit)
     assert_eq(game.snapshot().wave_start_tick, 1080)
     for _ in 0..<(limit * 1092) {
@@ -39,7 +42,7 @@ test "E - every level stops at its configured life limit and stays stopped" {
 
 ///|
 test "6x stops on the completed sweep without consuming the next life's first frame" {
-  let game = @sim.Game::new(1)
+  let game = @sim.Game::new(1, progress=@sim.RunProgress::new(heart_capacity=2))
   for _ in 0..<1091 {
     game.step(@sim.Input::wait())
   }
@@ -52,10 +55,10 @@ test "6x stops on the completed sweep without consuming the next life's first fr
 
 ///|
 test "debug numbers and portal order agree after swapping rooms three and four" {
-  for index, id in [0, 1, 3, 2] {
+  for index, id in [0, 1, 3, 2, 4] {
     let number = index + 1
     assert_eq(@sim.level_for_number(number), id)
     assert_eq(@sim.level_number(id), number)
-    assert_eq(@sim.Game::new(id).snapshot().max_lives, [1, 2, 2, 3][index])
+    assert_eq(@sim.Game::new(id).snapshot().max_lives, 1)
   }
 }

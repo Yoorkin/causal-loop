@@ -16,6 +16,7 @@ with sync_playwright() as p:
     page.goto('http://127.0.0.1:8000/')
     page.wait_for_function('document.querySelector("canvas").dataset.state')
     page.locator('#debug-mode').check()
+    page.locator('#canvas').click()
 
     def read():
         return page.evaluate('''() => {
@@ -42,7 +43,7 @@ with sync_playwright() as p:
     assert initial['minute'] > 0 and abs(initial['hour'] - initial['minute']/12) < 1e-7
     start = shot('tutorial-start')
     assert start.getpixel((560, 41)) == (237, 83, 99)
-    assert start.getpixel((954, 528)) == (237, 83, 99)
+    assert start.getpixel((954, 528)) != (237, 83, 99)
     page.keyboard.down('Space')
     page.wait_for_timeout(400)
     assert read()['speed'] == 6 and read()['minute'] > initial['minute']
@@ -63,20 +64,25 @@ with sync_playwright() as p:
     wait('s.actors[0].grounded && s.actors[0].y == 5220')
     shot('tutorial-landed')
     page.keyboard.down('d')
+    wait('s.actors[0].x >= 7600')
+    page.keyboard.down('s')
+    wait('s.actors[0].x >= 8540')
+    page.keyboard.up('s')
     wait('s.heart_collected')
     page.keyboard.up('d')
     assert read()['s']['max_lives'] == 2
-    picked = shot('tutorial-heart-collected')
-    for x in [544, 576]:
-        assert picked.getpixel((x, 41)) == (237, 83, 99)
-    assert picked.getpixel((954, 528)) != (237, 83, 99)
+    assert read()['s']['remaining_lives'] == 1
+    picked = shot('tutorial-empty-container-collected')
+    assert picked.getpixel((544, 41)) == (237, 83, 99)
+    assert picked.getpixel((576, 41)) != (237, 83, 99)
     page.keyboard.down('d')
     wait('s.level == 1')
     page.keyboard.up('d')
     assert read()['mode'] == 'transition' and read()['tick'] == 0
     wait('d.mode == "play"')
     assert read()['s']['max_lives'] == 2
-    print('Tutorial: two jumps, S drop, heart 1→2 and automatic next room passed.', flush=True)
+    assert read()['s']['remaining_lives'] == 2
+    print('Tutorial: two jumps, S drop, S + D crawl, empty container and full refill on completion passed.', flush=True)
 
     page.keyboard.down('Space')
     wait('d.wavePhase == "holding"')
@@ -87,7 +93,7 @@ with sync_playwright() as p:
     consumed = shot('teaching-heart-consumed')
     assert held['minute'] == 360
     assert consumed.getpixel((544, 41)) == (237, 83, 99)
-    assert consumed.getpixel((576, 41)) == (52, 66, 75)
+    assert consumed.getpixel((576, 41)) != (237, 83, 99)
     wait('d.wavePhase == "fading"')
     hold_duration = time.monotonic() - hold_start
     assert 1.5 <= hold_duration <= 1.9
@@ -118,14 +124,17 @@ with sync_playwright() as p:
     page.wait_for_timeout(50)
     print('Teaching: heart flight, 4s rewind, 1.6s zero pause; immediate controllable rebirth.', flush=True)
 
-    for key in [1, 2, 3, 4]:
+    for key in [1, 2, 3, 4, 5]:
         press(str(key))
         r = read()
-        assert r['s']['level'] == [0, 1, 3, 2][key - 1]
+        assert r['s']['level'] == [0, 1, 3, 2, 4][key - 1]
         assert r['s']['life'] == 1 and r['s']['history_lengths'] == []
         assert abs(r['hour'] - ((key - 1)*30 + r['minute']/12)) < 1e-7
         if key == 1:
             assert r['s']['max_lives'] == 1 and not r['s']['heart_collected']
+        else:
+            assert r['s']['max_lives'] == 2
+        assert r['s']['inventory']['time_acceleration'] == (key >= 3)
     press('3')
     page.keyboard.down('Space')
     wait('d.wavePhase == "fading"')
@@ -136,13 +145,16 @@ with sync_playwright() as p:
     assert 1.0 <= normal_duration <= 1.4
     page.keyboard.up('Space')
     page.wait_for_timeout(50)
-    press('1')
+    page.reload()
+    wait('s.level == 0')
+    page.locator('#debug-mode').check()
+    page.locator('#canvas').click()
     page.keyboard.down('Space')
     wait('s.outcome == "Lost"')
     assert read()['s']['life'] == 1 and read()['minute'] == 360
     page.keyboard.up('Space')
     assert not errors, errors
-    result = {'passed': True, 'debug_keys': {'1': 'tutorial', '2': 'bridge', '3': 'three gates (two lives)', '4': 'two plates (three lives)'},
+    result = {'passed': True, 'debug_keys': {'1': 'tutorial', '2': 'bridge', '3': 'three gates', '4': 'reciprocal gates', '5': 'falling crates'},
               'post_impact_hold_seconds': hold_duration, 'rewind_seconds': fade_duration, 'heart_leaves_hud_before_rewind': True, 'clock_zero_hold_seconds': reset_duration, 'immediate_rebirth': True,
               'normal_rewind_seconds': normal_duration, 'errors': errors,
               'verification': 'Real keyboard inputs and rendered pixels; no state injection.'}

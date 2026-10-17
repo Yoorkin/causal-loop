@@ -49,7 +49,7 @@ fn record_runner(game : @sim.Game) -> Unit {
 
 ///|
 test "Level 3 - a climbing present changes the blocked runner's original inputs" {
-  let game = @sim.Game::new(3)
+  let game = @sim.Game::new(3, progress=@sim.RunProgress::new(heart_capacity=2))
   let origin = game.snapshot().actors[0].x
   for t in 0..<320 {
     game.step(runner_input(t, origin))
@@ -82,7 +82,7 @@ test "Level 3 - a climbing present changes the blocked runner's original inputs"
 
 ///|
 test "Level 3 - delay misses the recorded jump and prevents the runner clearing the steps" {
-  let game = @sim.Game::new(3)
+  let game = @sim.Game::new(3, progress=@sim.RunProgress::new(heart_capacity=2))
   record_runner(game)
   for t in 0..<500 {
     game.step(
@@ -99,7 +99,7 @@ test "Level 3 - delay misses the recorded jump and prevents the runner clearing 
 
 ///|
 test "Level 3 - walking cannot activate any elevated plate or bypass closed gates" {
-  let game = @sim.Game::new(3)
+  let game = @sim.Game::new(3, progress=@sim.RunProgress::new(heart_capacity=2))
   run_for(game, 70, -1)
   assert_false(game.snapshot().plate_a)
   run_for(game, 320, 1)
@@ -112,7 +112,7 @@ test "Level 3 - walking cannot activate any elevated plate or bypass closed gate
 
 ///|
 test "G - reset clears all three gates and plates but keeps input histories" {
-  let game = @sim.Game::new(3)
+  let game = @sim.Game::new(3, progress=@sim.RunProgress::new(heart_capacity=2))
   for t in 0..<170 {
     game.step(climber_input(t, game))
   }
@@ -135,7 +135,7 @@ test "G - reset clears all three gates and plates but keeps input histories" {
 
 ///|
 test "history expiry releases elevated pressure plate and immediately begins closure" {
-  let game = @sim.Game::new(3)
+  let game = @sim.Game::new(3, progress=@sim.RunProgress::new(heart_capacity=2))
   for t in 0..<70 {
     game.step(climber_input(t, game))
   }

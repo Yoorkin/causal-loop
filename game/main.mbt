@@ -1,15 +1,19 @@
 ///|
 priv struct Session {
   mut game : @sim.Game
+  mut checkpoint : @sim.RunProgress
   mut paused : Bool
   mut fast : Bool
   mut debug : Bool
+  mut crate_room : CrateRoom?
   mut transition : Double
   mut departing : @sim.Snapshot?
+  scene_replay : SceneReplay
   mut rewind_elapsed : Double
   mut rewind_progress : Double
   mut game_over_elapsed : Double
   mut item_flight : ItemFlight?
+  mut tutorial : TutorialGuide
   mut accumulator : Double
   mut requested_level : Int32
   mut restart : Bool
@@ -18,37 +22,54 @@ priv struct Session {
   exit_icon : @asset.ImageHandle
   actor_atlas : @asset.ImageHandle
   heart_icon : @asset.ImageHandle
+  heart_container_icon : @asset.ImageHandle
   acceleration_icon : @asset.ImageHandle
 }
 
 ///|
-fn Session::load(self : Session, level : Int32) -> Unit {
-  self.game = @sim.Game::new(
-    level,
-    seed=spawn_seed(),
-    inventory=self.game.snapshot().inventory,
-  )
+fn Session::load(
+  self : Session,
+  level : Int32,
+  progress : @sim.RunProgress,
+) -> Unit {
+  if self.crate_room is Some(room) {
+    room.clear()
+  }
+  self.crate_room = if @sim.is_rigid_room(level) {
+    Some(CrateRoom::new())
+  } else {
+    None
+  }
+  let progress = if self.debug {
+    @sim.debug_checkpoint(level)
+  } else {
+    progress
+  }
+  self.game = @sim.Game::new(level, seed=spawn_seed(), progress~)
   self.paused = false
   self.fast = false
   self.transition = 0.0
   self.departing = None
+  self.scene_replay.frames.clear()
   self.rewind_elapsed = 0.0
   self.rewind_progress = 0.0
   self.game_over_elapsed = 0.0
   self.accumulator = 0.0
   self.entity_life = 0
+  self.tutorial = TutorialGuide::new()
+  self.item_flight = None
 }
 
 ///|
 fn Session::update(self : Session) -> Unit {
   let view = self.game.snapshot()
   if self.requested_level >= 0 {
-    self.load(self.requested_level)
+    self.load(self.requested_level, self.game.progress())
     self.requested_level = -1
     return
   }
   if self.restart {
-    self.load(view.level)
+    self.load(view.level, self.checkpoint)
     self.restart = false
     return
   }
@@ -65,7 +86,7 @@ fn Session::update(self : Session) -> Unit {
   if view.outcome == @sim.Lost {
     // A held fast-forward key must not dismiss the final moment of failure.
     if @inputs.is_just_pressed(Space) {
-      self.load(view.level)
+      self.load(view.level, self.checkpoint)
       return
     }
     if @inputs.is_just_pressed(Enter) {
@@ -91,6 +112,7 @@ fn Session::update(self : Session) -> Unit {
       let timing = rewind_timing(departing.level, departing.life)
       if self.rewind_elapsed >= clock_zero_time(timing) + timing.reset_delay {
         self.departing = None
+        self.scene_replay.frames.clear()
       }
     }
     self.fast = false
@@ -154,9 +176,15 @@ fn Session::update(self : Session) -> Unit {
   }
   while self.accumulator >= 1.0 / 60.0 {
     let before = self.game.snapshot()
-    self.game.advance_batch(input, self.fast, debug=self.debug)
+    let physics = self.crate_room.map(room => {
+      fn(view, inputs) { room.step(view, inputs) }
+    })
+    self.game.advance_batch(input, self.fast, debug=self.debug, physics?, before_step=frame => {
+      self.scene_replay.record(frame)
+    })
     self.accumulator -= 1.0 / 60.0
     let after = self.game.snapshot()
+    self.tutorial.advance(before, after)
     // Capture the world icon before a portal can replace its level geometry.
     for pickup in @sim.level_geometry(before.level).items {
       if !before.inventory.contains(pickup.kind) &&
@@ -173,13 +201,21 @@ fn Session::update(self : Session) -> Unit {
       self.fast = false
     }
     if after.outcome == @sim.Won {
-      self.load(@sim.level_for_number(@sim.level_number(after.level) % 4 + 1))
+      // A completed room refills its acquired containers and commits a value
+      // checkpoint. Retrying discards this room's uncommitted acquisitions.
+      if !self.debug {
+        self.checkpoint = self.game.progress()
+      }
+      let flight = self.item_flight
+      self.load(@sim.next_level(after.level), self.checkpoint)
+      self.item_flight = flight
       self.transition = 0.55
       break
     }
     if after.life != view.life || after.outcome != @sim.Playing {
       // Only another available life rewinds. Failure retains the final state.
       self.departing = if after.outcome == @sim.Lost {
+        self.scene_replay.frames.clear()
         None
       } else {
         Some(before)
@@ -228,15 +264,19 @@ fn Session::sync_entities(self : Session) -> Unit {
 pub fn run() -> Unit {
   let session : Session = {
     game: @sim.Game::new(0, seed=spawn_seed()),
+    checkpoint: @sim.RunProgress::new(),
     paused: false,
     fast: false,
     debug: false,
+    crate_room: None,
     transition: 0.0,
     departing: None,
+    scene_replay: { frames: [], },
     rewind_elapsed: 0.0,
     rewind_progress: 0.0,
     game_over_elapsed: 0.0,
     item_flight: None,
+    tutorial: TutorialGuide::new(),
     accumulator: 0.0,
     requested_level: -1,
     restart: false,
@@ -245,11 +285,14 @@ pub fn run() -> Unit {
     exit_icon: @asset.load_image("assets/exit.svg"),
     actor_atlas: @asset.load_image("assets/actors.svg"),
     heart_icon: @asset.load_image("assets/heart.svg"),
+    heart_container_icon: @asset.load_image("assets/heart-container.svg"),
     acceleration_icon: @asset.load_image("assets/time-acceleration.svg"),
   }
   browser_debug(enabled => {
     session.debug = enabled
-    session.fast = false
+    // Entering Debug reloads its fixed entry fixture; leaving it restores the
+    // real checkpoint. Debug completions never overwrite that checkpoint.
+    session.load(session.game.snapshot().level, session.checkpoint)
   })
   browser_events(
     (key, down) => {
@@ -260,6 +303,8 @@ pub fn run() -> Unit {
           "Digit2" => session.requested_level = @sim.level_for_number(2)
           "Digit3" => session.requested_level = @sim.level_for_number(3)
           "Digit4" => session.requested_level = @sim.level_for_number(4)
+          "Digit5" => session.requested_level = @sim.level_for_number(5)
+          "Digit6" => session.requested_level = @sim.level_for_number(6)
           _ => ()
         }
       }

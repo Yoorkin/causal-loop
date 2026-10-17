@@ -1,6 +1,6 @@
 ///|
 test "charging clock is harmless even when a body covers its centre" {
-  let game = Game::new(2)
+  let game = Game::new(1)
   game.actors[0].x = 5480
   game.actors[0].y = 2910
   for tick in [0, 540, 1079, 1080] {
@@ -40,7 +40,7 @@ test "the displayed wave edge uses circle-body contact including corners" {
 
 ///|
 test "wave freezes each actor on contact while a farther actor can still move" {
-  let game = Game::new(2)
+  let game = Game::new(1)
   game.histories.push(History::seal(Array::make(WaveEndTick, Input::wait())))
   game.actors = [
     Actor::new(0, { x: 5600, y: 4620, }),
@@ -73,8 +73,8 @@ test "wave freezes each actor on contact while a farther actor can still move" {
 
 ///|
 test "running away during expansion earns more unfrozen time" {
-  let waiting = Game::new(2)
-  let escaping = Game::new(2)
+  let waiting = Game::new(1)
+  let escaping = Game::new(1)
   for game in [waiting, escaping] {
     game.tick = 1080
     game.actors[0].x = 2600
@@ -90,7 +90,7 @@ test "running away during expansion earns more unfrozen time" {
 
 ///|
 test "6x stops at expansion and the sweep accepts movement at normal speed" {
-  let game = Game::new(2)
+  let game = Game::new(1)
   for _ in 0..<1079 {
     game.step(Input::wait())
   }
@@ -110,7 +110,7 @@ test "6x stops at expansion and the sweep accepts movement at normal speed" {
 
 ///|
 test "input replay reproduces contact and the exact frozen pose" {
-  let game = Game::new(1)
+  let game = Game::new(1, progress=RunProgress::new(heart_capacity=2))
   for _ in 0..<(WaveEndTick - 5) {
     game.step({ axis: 1, jump: false, crouch: false, })
   }

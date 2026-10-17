@@ -1,6 +1,6 @@
 ///|
 test "crouching keeps feet and pressure plates grounded and releases to stand" {
-  let game = @sim.Game::new(2)
+  let game = @sim.Game::new(1, progress=@sim.RunProgress::new(heart_capacity=2))
   for _ in 0..<20 {
     game.step(@sim.Input::wait())
   }
@@ -27,7 +27,7 @@ test "crouching keeps feet and pressure plates grounded and releases to stand" {
 
 ///|
 test "historical crouching replays the complete actor state at normal and fast speed" {
-  let game = @sim.Game::new(2)
+  let game = @sim.Game::new(1, progress=@sim.RunProgress::new(heart_capacity=3))
   let frames : Array[@sim.ActorView] = []
   for tick in 0..<180 {
     game.step({

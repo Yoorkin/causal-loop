@@ -19,17 +19,26 @@ fn Session::draw(self : Session) -> Unit {
     rect(x, 110.0, 112.0, 390.0, color(0x14222c))
     rect(x, 110.0, 112.0, 2.0, color(0x20313a))
   }
+  // World-space hints sit behind terrain, characters, and the shockwave.
+  if self.departing is None && self.transition <= 0.0 {
+    draw_tutorial_hint(self.tutorial, view)
+  } else {
+    present_tutorial_hint("", 0.0)
+  }
   let exit_ink = if view.outcome == @sim.Won {
     color(0xe8eee9)
   } else {
     color(0x67dfdc)
   }
   if view.outcome == @sim.Won {
-    rect(984.0, 404.0, 97.0, 96.0, color(0x67dfdc, alpha=0.12))
+    scene_rect(
+      { x: level.exit.x - 200, y: level.exit.y - 200, w: 900, h: 1000, },
+      color(0x67dfdc, alpha=0.12),
+    )
   }
   scene_rect(level.exit, {
     ..exit_ink,
-    a: if view.level == 0 || view.level == 3 || view.bridge_open {
+    a: if view.level != 1 || view.bridge_open {
       0.18
     } else {
       0.04
@@ -63,17 +72,21 @@ fn Session::draw(self : Session) -> Unit {
     )
   }
   if view.level == 0 {
-    draw_tutorial(level, view, self.heart_icon)
+    draw_tutorial(level)
+  } else if view.level == 2 {
+    draw_causal_room(level, view)
   } else if view.level == 3 {
     draw_tunnel(level, view)
+  } else if @sim.is_rigid_room(view.level) {
+    draw_crate_room(level, view)
   } else {
     let bridge_x = level.bridge.x.to_double() / 10.0
-    if view.bridge_open && view.level != 2 {
+    if view.bridge_open {
       scene_rect(level.bridge, color(0x67dfdc, alpha=0.75))
       for i in 0..<(level.bridge.w / 200) {
         rect(bridge_x + i.to_double() * 20.0, 503.0, 2.0, 13.0, color(0x14222d))
       }
-    } else if view.level != 2 {
+    } else {
       for i in 0..<(level.bridge.w / 200) {
         rect(bridge_x + i.to_double() * 20.0, 501.0, 10.0, 2.0, color(0x516571))
       }
@@ -88,31 +101,9 @@ fn Session::draw(self : Session) -> Unit {
         color(0xd88874),
       )
     }
-    scene_rect(
-      level.plate_a,
-      if view.plate_a {
-        color(0x67dfdc)
-      } else {
-        color(0xefbf67)
-      },
-    )
-    if view.plate_a {
-      rect(90.0, 488.0, 70.0, 12.0, color(0x67dfdc, alpha=0.12))
-    }
-    if view.level > 1 {
-      scene_rect(
-        level.plate_b,
-        if view.plate_b {
-          color(0x67dfdc)
-        } else {
-          color(0xb8a1ee)
-        },
-      )
-      if view.plate_b {
-        rect(570.0, 488.0, 100.0, 12.0, color(0x67dfdc, alpha=0.12))
-      }
-    }
+    draw_pressure_plate(level.plate_a, view.plate_a, color(0xefbf67))
   }
+  draw_heart_pickup(level, view, self.heart_container_icon)
   draw_item_pickups(level, view.inventory, self.acceleration_icon, view.tick)
   let progress = if self.departing is Some(_) {
     self.rewind_progress
@@ -140,7 +131,7 @@ fn Session::draw(self : Session) -> Unit {
       if @transform.transforms().get(self.entities[i]) is Some(transform) {
         let x = transform.translation.x
         let y = transform.translation.y
-        let current = i == view.actors.length() - 1
+        let current = i == view.actors.length() - 1 && self.departing is None
         draw_actor(actor, self.actor_atlas, x, y, view.tick, current)
       }
     }
@@ -160,6 +151,7 @@ fn Session::draw(self : Session) -> Unit {
       self.game.snapshot()
     },
     self.heart_icon,
+    self.heart_container_icon,
   )
   draw_heart_flight(flight, self.heart_icon)
   present_heart_flight(

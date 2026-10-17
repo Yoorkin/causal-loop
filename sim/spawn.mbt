@@ -7,7 +7,7 @@ priv struct Spawn {
 ///|
 // Three jittered, shuffled positions keep the combined bodies inside a 72 px
 // zone. Their separation makes the lives legible without re-rolling a replay.
-fn spawn_positions(seed : UInt32) -> ReadOnlyArray[Spawn] {
+fn spawn_positions(seed : UInt32, count~ : Int32 = 3) -> ReadOnlyArray[Spawn] {
   let mut state = seed
   let positions = []
   for slot in 0..<3 {
@@ -30,5 +30,12 @@ fn spawn_positions(seed : UInt32) -> ReadOnlyArray[Spawn] {
       { x, y: 3880 + ((state >> 16) % 201U).reinterpret_as_int(), }
     }
   ]
+  // Additional containers must not be limited by the original three-life demo.
+  for _ in 3..<count {
+    state = state * 1664525U + 1013904223U
+    let x = 2160 + ((state >> 16) % 481U).reinterpret_as_int()
+    state = state * 1664525U + 1013904223U
+    spawns.push({ x, y: 3880 + ((state >> 16) % 201U).reinterpret_as_int(), })
+  }
   ReadOnlyArray::from_array(spawns)
 }

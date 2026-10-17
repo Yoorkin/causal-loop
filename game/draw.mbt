@@ -20,3 +20,13 @@ fn rect(
     stroke_color: None,
   })
 }
+
+///|
+fn draw_pressure_plate(
+  plate : @sim.Rect,
+  pressed : Bool,
+  fill : @render.Color,
+) -> Unit {
+  let height = if pressed { plate.h / 3 } else { plate.h }
+  scene_rect({ ..plate, y: plate.y + plate.h - height, h: height, }, fill)
+}

@@ -1,6 +1,6 @@
 ///|
 test "C - history and current input share the same frame index" {
-  let game = @sim.Game::new(1)
+  let game = @sim.Game::new(1, progress=@sim.RunProgress::new(heart_capacity=2))
   for tick in 0..<120 {
     game.step({
       crouch: false,
@@ -36,8 +36,11 @@ test "C - history and current input share the same frame index" {
 
 ///|
 test "D - 6x and 1x have identical complete state at frame 600" {
-  let normal = @sim.Game::new(1)
-  let fast = @sim.Game::new(1)
+  let normal = @sim.Game::new(
+    1,
+    progress=@sim.RunProgress::new(heart_capacity=2),
+  )
+  let fast = @sim.Game::new(1, progress=@sim.RunProgress::new(heart_capacity=2))
   for _ in 0..<720 {
     normal.step({ crouch: false, axis: 1, jump: false, })
     fast.step({ crouch: false, axis: 1, jump: false, })

@@ -1,10 +1,18 @@
 ///|
 test "spawn choices vary by seed, stay three bodies wide and fall onto the floor" {
-  let first = @sim.Game::new(2, seed=0U).snapshot().actors[0]
+  let first = @sim.Game::new(
+      1,
+      progress=@sim.RunProgress::new(heart_capacity=3),
+      seed=0U,
+    ).snapshot().actors[0]
   let mut varied = false
   let mut varied_y = false
   for seed in 0..<64 {
-    let game = @sim.Game::new(2, seed=seed.reinterpret_as_uint())
+    let game = @sim.Game::new(
+      1,
+      progress=@sim.RunProgress::new(heart_capacity=3),
+      seed=seed.reinterpret_as_uint(),
+    )
     let starts : Array[@sim.ActorView] = []
     for life in 0..<3 {
       let initial = game.snapshot()
@@ -45,7 +53,11 @@ test "spawn choices vary by seed, stay three bodies wide and fall onto the floor
 ///|
 test "airborne histories replay identical trajectories from their own randomized start" {
   for seed in [0U, 1U, 42U, 2147483648U, 4294967295U] {
-    let game = @sim.Game::new(2, seed~)
+    let game = @sim.Game::new(
+      1,
+      progress=@sim.RunProgress::new(heart_capacity=3),
+      seed~,
+    )
     let frames = []
     for t in 0..<100 {
       game.step({
@@ -70,7 +82,11 @@ test "airborne histories replay identical trajectories from their own randomized
 ///|
 test "random spawn positions preserve the third-level timing solution across seeds" {
   for seed in 0..<64 {
-    let game = @sim.Game::new(3, seed=seed.reinterpret_as_uint())
+    let game = @sim.Game::new(
+      3,
+      progress=@sim.RunProgress::new(heart_capacity=2),
+      seed=seed.reinterpret_as_uint(),
+    )
     record_runner(game)
     for t in 0..<320 {
       game.step(climber_input(t, game))
